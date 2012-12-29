@@ -81,10 +81,10 @@ The string must be freed with FOREIGN-STRING-FREE."
     (%connect s addr)))
 
 (defmacro with-context ((context io-threads) &body body)
-  `(let ((,context (init ,io-threads)))
+  `(let ((,context (ctx_new ,io-threads)))
      (unwind-protect
           (progn ,@body)
-       (term ,context))))
+       (ctx_destroy ,context))))
 
 (defmacro with-socket ((socket context type) &body body)
   `(let ((,socket (socket ,context ,type)))
@@ -114,10 +114,10 @@ The string must be freed with FOREIGN-STRING-FREE."
         arr))))
 
 (defun send (s msg &optional flags)
-  (%send s (msg-raw msg) (or flags 0)))
+  (%send (msg-raw msg) s (or flags 0)))
 
 (defun recv (s msg &optional flags)
-  (%recv s (msg-raw msg) (or flags 0)))
+  (%recv (msg-raw msg) s (or flags 0)))
 
 (defun msg-init-size (msg size)
   (%msg-init-size (msg-raw msg) size))

@@ -42,10 +42,7 @@
 (defconstant msg-shared 128)
 
 (defcstruct (msg)
-  (content      :pointer)
-  (shared       :uchar)
-  (vsm-size     :uchar)
-  (vsm-data     :uchar :count 30))      ;; FIXME max-vsm-size
+  (vsm-data     :uchar :count 32))      ;; FIXME max-vsm-size
 
 (defcfun ("zmq_msg_init" msg-init) :int
   (msg  msg))
@@ -90,6 +87,13 @@
   (io-threads   :int))
 
 (defcfun ("zmq_term" term) :int
+  (context      :pointer))
+
+
+(defcfun* ("zmq_ctx_new" ctx_new) :pointer
+  (io-threads   :int))
+
+(defcfun ("zmq_ctx_destroy" ctx_destroy) :int
   (context      :pointer))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,15 +156,15 @@
   (addr :pointer :char))
 
 
-(defcfun* ("zmq_send" %send) :int
+(defcfun* ("zmq_msg_send" %send) :int
+  (msg          (:pointer msg))
   (s            :pointer)
-  (msg          msg)
   :optional
   (flags        :int))
 
-(defcfun* ("zmq_recv" %recv) :int
+(defcfun* ("zmq_msg_recv" %recv) :int
+  (msg          (:pointer msg))
   (s            :pointer)
-  (msg          msg)
   :optional
   (flags        :int))
 

@@ -43,12 +43,14 @@
                     (defun ,l-name (,@names ,@(when opts-init `(&optional ,@opts-init)))
                       ,docstring
                       (let ((,ret (,n-name ,@names ,@opts)))
-                        (if ,(if (eq return-type :pointer)
-                                 `(zerop (pointer-address ,ret))
-                                 `(not (zerop ,ret)))
+                        (if ,(cond
+                              ((eq return-type :pointer) `(zerop (pointer-address ,ret)))
+                              ((or (string= c-name "zmq_msg_send") (string= c-name "zmq_msg_recv")) `(minusp ,ret))
+                              (t `(not (zerop ,ret))))
                             (let ((errno (errno)))
                               (cond
                                 #-windows
                                 ((eq errno isys:ewouldblock) (error 'error-again :argument errno))
                                 (t (error (convert-from-foreign (%strerror errno) :string)))))
                             ,ret))))))))
+
